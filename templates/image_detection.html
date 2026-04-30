@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万斯图像检索系统</title>
+    <style>
+        /* Apple风格设计 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.47;
+            letter-spacing: -0.374px;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .navbar-content {
+            max-width: 980px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .navbar-logo {
+            font-size: 40px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        /* 主容器 */
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* 英雄区域 */
+        .hero-section {
+            text-align: center;
+            padding: 60px 0;
+            background: black;
+            color: white;
+            margin: -40px -20px 60px;
+        }
+        
+        .hero-title {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.07;
+            letter-spacing: -0.28px;
+            margin-bottom: 20px;
+        }
+        
+        /* 内容区域 */
+        .content-section {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 1.14;
+            letter-spacing: 0.196px;
+            margin-bottom: 30px;
+            color: #1d1d1f;
+        }
+        
+        /* 上传区域 */
+        .upload-section {
+            border: 2px dashed #e0e0e0;
+            border-radius: 11px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: #0071e3;
+            background-color: #f8f8f8;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #0071e3;
+        }
+        
+        .upload-text {
+            font-size: 17px;
+            font-weight: 400;
+            color: rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.48);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        /* 上传图片列表 */
+        .upload-list {
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .upload-list-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        /* 设置区域 */
+        .settings {
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .settings label {
+            font-size: 17px;
+            font-weight: 400;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .settings select {
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 17px;
+            font-family: inherit;
+            background: white;
+            color: #1d1d1f;
+        }
+        
+        /* 按钮 */
+        .search-btn {
+            background: #0071e3;
+            color: white;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-size: 17px;
+            font-weight: 400;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 30px 0;
+        }
+        
+        .search-btn:hover {
+            background: #0066cc;
+        }
+        
+        .search-btn:disabled {
+            background: #e0e0e0;
+            color: rgba(0, 0, 0, 0.48);
+            cursor: not-allowed;
+        }
+        
+        /* 加载区域 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #0071e3;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 17px;
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        /* 结果区域 */
+        .results-section {
+            margin-top: 40px;
+            display: none;
+        }
+        
+        .results-title {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+        
+        .results-stats {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.48);
+            margin-bottom: 30px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+        }
+        
+        .result-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .result-image:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            position: relative;
+            margin: 5% auto;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-image {
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .modal-caption {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        
+        /* 推荐记录样式 */
+        .recommendation-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .recommendation-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1d1d1f;
+        }
+
+        /* 推荐表单 */
+        .recommendation-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f8f9;
+            border-radius: 8px;
+        }
+
+        .recommendation-form label {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.7);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .recommendation-form select,
+        .recommendation-form input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .recommendation-form button {
+            padding: 8px 16px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: end;
+        }
+
+        .recommendation-form button:hover {
+            background: #0066cc;
+        }
+
+        .recommendation-form button:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+        }
+
+        /* 推荐记录表格 */
+        .recommendation-table {
+            width: 100%;
+            border-collapse: collapse;
+            max-height: 300px;
+            overflow-y: auto;
+            display: block;
+        }
+
+        .recommendation-table th,
+        .recommendation-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .recommendation-table th {
+            background: #f8f8f9;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .recommendation-table tbody tr:hover {
+            background-color: #f8f8f9;
+        }
+
+        .recommendation-table .status-pending {
+            color: #0071e3;
+            font-weight: 500;
+        }
+
+        .recommendation-table .status-cancelled {
+            color: #ff4d4f;
+            font-weight: 500;
+        }
+
+        .recommendation-table .status-ordered {
+            color: #34c759;
+            font-weight: 500;
+        }
+
+        .recommendation-btn-cancel {
+            padding: 4px 10px;
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .recommendation-btn-cancel:hover {
+            background: #ff7875;
+        }
+
+        .recommendation-btn-cancel:disabled {
+            background: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .recommendation-btn-delete {
+            padding: 4px 10px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .recommendation-btn-delete:hover {
+            background: #333;
+        }
+
+        .recommendation-btn-order {
+            padding: 4px 10px;
+            background: #34c759;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 5px;
+        }
+
+        .recommendation-btn-order:hover {
+            background: #30d158;
+        }
+
+        .recommendation-count {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+        }
+
+        .recommendation-progress {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .recommendation-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0071e3, #34c759);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .recommendation-error {
+            color: #ff4d4f;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .recommendation-error.show {
+            display: block;
+        }
+
+        .close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #0071e3;
+        }
+
+        /* 翻页控件 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1d1d1f;
+        }
+
+        .pagination button:hover:not(:disabled):not(.active) {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+
+        .pagination button.active {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+            font-weight: 600;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.5);
+            margin: 0 8px;
+        }
+
+        .pagination .page-ellipsis {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.4);
+            padding: 0 4px;
+        }
+
+        /* 记录列表滚动容器 */
+        .records-scroll-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .records-scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .records-scroll-container::-webkit-scrollbar-track {
+            background: #f8f8f9;
+            border-radius: 3px;
+        }
+
+        .records-scroll-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .records-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
+        .records-count-badge {
+            display: inline-block;
+            background: #e8e8ed;
+            color: rgba(0,0,0,0.6);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+        
+        .result-info {
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        /* 错误信息 */
+        .error-message {
+            background: #ffdddd;
+            color: #d8000c;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 40px;
+            }
+            
+            .content-section {
+                padding: 20px;
+            }
+            
+            .upload-section {
+                padding: 40px 20px;
+            }
+            
+            .settings {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 28px;
+            }
+            
+            .container {
+                padding: 20px 10px;
+            }
+            
+            .content-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content" style="justify-content: space-between; padding: 0 20px;">
+            <div class="navbar-logo" style="font-size: 28px;">万斯图像检索系统</div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <a href="#" onclick="showPage('search')" id="navSearch" style="color: white; text-decoration: none; font-size: 20px; padding: 14px 0; border-bottom: 2px solid white;">图像搜索</a>
+                <a href="#" onclick="showPage('products')" id="navProducts" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 20px; padding: 14px 0; border-bottom: 2px solid transparent;">商品信息</a>
+                <a href="#" onclick="showPage('admin')" id="navAdmin" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 20px; padding: 14px 0; border-bottom: 2px solid transparent; display: none;">用户管理</a>
+                <div id="userSection" style="display: flex; align-items: center; gap: 10px; margin-left: 20px;">
+                    <span id="navUserDisplay" style="color: rgba(255,255,255,0.8); font-size: 14px;"></span>
+                    <button id="navLogoutBtn" onclick="doLogout()" style="display:none; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 4px 12px; font-size: 13px; cursor: pointer;">退出</button>
+                    <button id="navLoginBtn" onclick="showAuthModal('login')" style="background: #0071e3; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 13px; cursor: pointer;">登录</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 搜索页面 -->
+    <div id="searchPage">
+    <!-- 英雄区域 -->
+    <section class="hero-section">
+        <h1 class="hero-title">基于深度学习的高精度图像相似度搜索</h1>
+    </section>
+    
+    <!-- 主内容 -->
+    <div class="container">
+        <section class="content-section">
+            <h2 class="section-title">图像搜索</h2>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <!-- 上传区域 -->
+            <div style="margin-bottom: 30px;">
+                <button onclick="document.getElementById('fileInput').click()" style="
+                    background: #0071e3;
+                    color: white;
+                    border: 1px solid transparent;
+                    border-radius: 8px;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    font-weight: 400;
+                    font-family: inherit;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">
+                    选择图片
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
+            </div>
+            
+            <!-- 文字搜索 -->
+            <div style="margin-bottom: 30px;">
+                <label for="textQuery" style="display: block; margin-bottom: 10px; font-size: 17px; font-weight: 400; color: rgba(0, 0, 0, 0.8);">文字搜索：</label>
+                <input type="text" id="textQuery" placeholder="输入材质、工艺、价格区间等" style="
+                    width: 100%;
+                    padding: 12px 15px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-family: inherit;
+                    background: white;
+                    color: #1d1d1f;
+                ">
+                <div style="font-size: 12px; color: rgba(0, 0, 0, 0.48); margin-top: 5px;">
+                    支持材质、工艺、价格区间等关键词搜索
+                </div>
+            </div>
+            
+            <!-- 属性筛选 -->
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 10px; font-size: 17px; font-weight: 400; color: rgba(0, 0, 0, 0.8);">属性筛选：</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 14px; color: rgba(0, 0, 0, 0.6);">材质：</label>
+                        <input type="text" id="materialFilter" placeholder="输入材质（留空则不筛选）" style="
+                            width: 100%;
+                            padding: 8px 12px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-family: inherit;
+                            background: white;
+                            color: #1d1d1f;
+                        ">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 14px; color: rgba(0, 0, 0, 0.6);">工艺：</label>
+                        <input type="text" id="craftFilter" placeholder="输入工艺（留空则不筛选）" style="
+                            width: 100%;
+                            padding: 8px 12px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-family: inherit;
+                            background: white;
+                            color: #1d1d1f;
+                        ">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 14px; color: rgba(0, 0, 0, 0.6);">花纹：</label>
+                        <input type="text" id="patternFilter" placeholder="输入花纹（留空则不筛选）" style="
+                            width: 100%;
+                            padding: 8px 12px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-family: inherit;
+                            background: white;
+                            color: #1d1d1f;
+                        ">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 14px; color: rgba(0, 0, 0, 0.6);">价格区间：</label>
+                        <input type="text" id="priceRange" placeholder="例如：20-100" style="
+                            width: 100%;
+                            padding: 8px 12px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-family: inherit;
+                            background: white;
+                            color: #1d1d1f;
+                        ">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 上传图片列表 -->
+            <div class="upload-list" id="uploadList" style="margin: 20px 0; display: none;">
+                <h3 class="section-title" style="font-size: 16px; margin-bottom: 15px;">已上传图片</h3>
+                <div class="upload-list-grid" id="uploadListGrid" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
+                    <button onclick="clearUploads()" style="padding: 6px 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; cursor: pointer;">
+                        清空所有
+                    </button>
+                    <button onclick="equalizeWeights()" style="padding: 6px 12px; background: #0071e3; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer;">
+                        一键取均值
+                    </button>
+                    <span style="font-size: 12px; color: rgba(0, 0, 0, 0.48);">权重会自动归一化</span>
+                </div>
+            </div>
+            
+            <!-- 设置区域 -->
+            <div class="settings">
+                <label for="perPage">每页显示图片数量：</label>
+                <select id="perPage">
+                    <option value="5">5个</option>
+                    <option value="10" selected>10个</option>
+                    <option value="15">15个</option>
+                    <option value="20">20个</option>
+                    <option value="30">30个</option>
+                </select>
+                <label for="searchMode" style="margin-left: 20px;">匹配算法：</label>
+                <select id="searchMode">
+                    <option value="fusion" selected>综合（整体+颜色+材质）</option>
+                    <option value="original">整体</option>
+                </select>
+            </div>
+            
+            <!-- 权重调整区域 -->
+            <div class="weights-section" id="weightsSection" style="margin: 30px 0;">
+                <h3 class="section-title" style="font-size: 18px; margin-bottom: 20px;">综合模式权重调整</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="dinoWeight" style="display: block; margin-bottom: 5px; font-size: 14px;">整体特征 (DINOv2): <span id="dinoWeightValue">60%</span></label>
+                    <input type="range" id="dinoWeight" min="0" max="100" value="60" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="colorWeight" style="display: block; margin-bottom: 5px; font-size: 14px;">颜色特征: <span id="colorWeightValue">20%</span></label>
+                    <input type="range" id="colorWeight" min="0" max="100" value="20" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="textureWeight" style="display: block; margin-bottom: 5px; font-size: 14px;">材质纹理: <span id="textureWeightValue">20%</span></label>
+                    <input type="range" id="textureWeight" min="0" max="100" value="20" style="width: 100%;">
+                </div>
+                <div style="font-size: 12px; color: rgba(0, 0, 0, 0.48); margin-top: 10px;">
+                    注意：权重会自动归一化，总和始终为100%
+                </div>
+            </div>
+            
+            <!-- 搜索按钮 -->
+            <button class="search-btn" id="searchBtn" onclick="searchImages()" disabled>开始搜索</button>
+            
+            <!-- 加载区域 -->
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">正在搜索，请稍候...</p>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div class="results-section" id="resultsSection">
+                <h2 class="results-title">搜索结果</h2>
+                <p class="results-stats" id="resultsStats"></p>
+                <div class="results-grid" id="resultsGrid"></div>
+                <div class="pagination" id="paginationControls" style="display:none;"></div>
+            </div>
+            
+            <!-- 推荐/下单记录已移至商品信息页面 -->
+        </section>
+    </div>
+    </div><!-- end searchPage -->
+    
+    <!-- 商品信息页面 -->
+    <div id="productsPage" style="display: none;">
+        <div class="container">
+            <section class="content-section">
+                <h2 class="section-title">商品信息管理</h2>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="productSearchInput" placeholder="搜索商品名称..." oninput="filterProductGrid()" style="
+                        width: 100%;
+                        padding: 12px 15px;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-family: inherit;
+                    ">
+                </div>
+                <div id="productLoading" style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner" style="display: inline-block;"></div>
+                    <p>正在加载商品信息...</p>
+                </div>
+                <div id="productGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;"></div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- 商品详情模态框 -->
+    <div id="productDetailModal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(3px); overflow-y:auto;">
+        <div style="max-width: 900px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; position: relative;">
+            <button onclick="closeProductDetail()" style="position:absolute; top:15px; right:15px; background:rgba(0,0,0,0.1); border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer; z-index:1;">&times;</button>
+            <div style="display: flex; flex-wrap: wrap;">
+                <!-- 左侧图片 -->
+                <div style="flex: 0 0 300px; max-width: 300px; padding: 20px;">
+                    <img id="pdImage" src="" style="width:100%; border-radius:8px; object-fit:cover;">
+                </div>
+                <!-- 右侧信息 -->
+                <div style="flex: 1; padding: 20px; min-width: 300px;">
+                    <h2 id="pdName" style="font-size: 20px; font-weight: 600; margin-bottom: 20px;"></h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-size:12px; color:rgba(0,0,0,0.5); display:block; margin-bottom:4px;">材质</label>
+                            <input type="text" id="pdMaterial" style="width:100%; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:14px;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:rgba(0,0,0,0.5); display:block; margin-bottom:4px;">工艺</label>
+                            <input type="text" id="pdCraft" style="width:100%; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:14px;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:rgba(0,0,0,0.5); display:block; margin-bottom:4px;">花纹</label>
+                            <input type="text" id="pdPattern" style="width:100%; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:14px;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5); display:block; margin-bottom:4px;">信息描述（价格信息请写为"xx元"格式）</label>
+                        <textarea id="pdDescription" rows="3" style="width:100%; padding:8px; border:1px solid #e0e0e0; border-radius:6px; font-size:14px; resize:vertical;"></textarea>
+                    </div>
+                    <button id="pdSaveBtn" onclick="saveProductInfo()" style="padding:8px 24px; background:#0071e3; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">保存信息</button>
+                    <span id="pdSaveMsg" style="font-size:13px; color:#34c759; margin-left:10px; display:none;">已保存</span>
+                </div>
+            </div>
+            
+            <!-- 下单记录 -->
+            <div style="padding: 0 20px 20px;">
+                <h3 style="font-size:16px; font-weight:600; margin-bottom:12px; padding-top:15px; border-top:1px solid #f0f0f0;">下单记录<span id="orderCountBadge" class="records-count-badge"></span></h3>
+                <div id="orderFormSection" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:12px; padding:12px; background:#f8f8f9; border-radius:8px;">
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">区域</label>
+                        <input type="text" id="orderRegion" placeholder="区域" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">客户</label>
+                        <input type="text" id="orderCustomer" placeholder="客户名称" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">下单人</label>
+                        <input type="text" id="orderPerson" placeholder="下单人" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div style="align-self:end;">
+                        <button onclick="addRecord('order')" style="padding:6px 14px; background:#34c759; color:white; border:none; border-radius:4px; font-size:13px; cursor:pointer;">添加下单</button>
+                    </div>
+                </div>
+                <div id="orderError" style="color:#ff4d4f; font-size:12px; margin-bottom:8px; display:none;"></div>
+                <div class="records-scroll-container">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:#f8f8f9;">
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">区域</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">客户</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">下单人</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">时间</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">状态</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderRecordsList"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 推荐记录 -->
+            <div style="padding: 0 20px 20px;">
+                <h3 style="font-size:16px; font-weight:600; margin-bottom:12px; padding-top:15px; border-top:1px solid #f0f0f0;">推荐记录<span id="recCountBadge" class="records-count-badge"></span></h3>
+                <div id="recFormSection" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:12px; padding:12px; background:#f8f8f9; border-radius:8px;">
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">区域</label>
+                        <input type="text" id="recRegion" placeholder="区域" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">客户</label>
+                        <input type="text" id="recCustomer" placeholder="客户名称" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; color:rgba(0,0,0,0.5);">推荐人</label>
+                        <input type="text" id="recPerson" placeholder="推荐人" style="width:100%; padding:6px 8px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px;">
+                    </div>
+                    <div style="align-self:end;">
+                        <button onclick="addRecord('recommend')" style="padding:6px 14px; background:#0071e3; color:white; border:none; border-radius:4px; font-size:13px; cursor:pointer;">添加推荐</button>
+                    </div>
+                </div>
+                <div id="recError" style="color:#ff4d4f; font-size:12px; margin-bottom:8px; display:none;"></div>
+                <div class="records-scroll-container">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:#f8f8f9;">
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">区域</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">客户</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">推荐人</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">时间</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">状态</th>
+                                <th style="padding:8px; text-align:left; position:sticky; top:0; background:#f8f8f9; z-index:1;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recRecordsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图片查看模态框 -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <img class="modal-image" id="modalImage" src="" alt="大图">
+            <div class="modal-caption" id="modalCaption"></div>
+        </div>
+    </div>
+    
+    <!-- 登录/注册模态框 -->
+    <div id="authModal" style="display:none; position:fixed; z-index:5000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px);">
+        <div style="max-width: 400px; margin: 100px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="padding: 30px;">
+                <h2 id="authTitle" style="font-size: 24px; font-weight: 600; text-align: center; margin-bottom: 25px;">登录</h2>
+                
+                <div id="authError" style="background: #fff0f0; color: #d8000c; padding: 10px 15px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none;"></div>
+                
+                <!-- 用 form autocomplete=off 阻止浏览器自动填充 -->
+                <form id="authForm" autocomplete="off" onsubmit="return false;">
+                    <!-- 隐藏的陷阱字段，吸收浏览器自动填充 -->
+                    <input type="text" style="display:none;" tabindex="-1">
+                    <input type="password" style="display:none;" tabindex="-1">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 13px; color: rgba(0,0,0,0.6); margin-bottom: 5px;">用户名</label>
+                        <input type="text" id="authUsername" autocomplete="off" placeholder="输入用户名" readonly onfocus="this.removeAttribute('readonly');" style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; font-family: inherit; box-sizing: border-box;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 13px; color: rgba(0,0,0,0.6); margin-bottom: 5px;">密码</label>
+                        <input type="password" id="authPassword" autocomplete="off" placeholder="输入密码" readonly onfocus="this.removeAttribute('readonly');" style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; font-family: inherit; box-sizing: border-box;">
+                    </div>
+                    
+                    <div id="authDisplayNameRow" style="margin-bottom: 15px; display: none;">
+                        <label style="display: block; font-size: 13px; color: rgba(0,0,0,0.6); margin-bottom: 5px;">显示名称（选填）</label>
+                        <input type="text" id="authDisplayName" autocomplete="off" placeholder="输入显示名称" style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; font-family: inherit; box-sizing: border-box;">
+                    </div>
+                </form>
+                
+                <button id="authSubmitBtn" onclick="submitAuth()" style="width: 100%; padding: 12px; background: #0071e3; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 15px; font-family: inherit;">登录</button>
+                
+                <div style="text-align: center; font-size: 14px; color: rgba(0,0,0,0.6);">
+                    <span id="authSwitchText">还没有账号？</span>
+                    <a href="#" id="authSwitchLink" onclick="toggleAuthMode()" style="color: #0071e3; text-decoration: none; font-weight: 500;">去注册</a>
+                </div>
+                
+                <div style="text-align: center; margin-top: 10px;">
+                    <a href="#" onclick="closeAuthModal()" style="color: rgba(0,0,0,0.4); text-decoration: none; font-size: 13px;">取消</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 管理员面板页面 -->
+    <div id="adminPage" style="display: none;">
+        <div class="container">
+            <section class="content-section">
+                <h2 class="section-title">用户管理</h2>
+                <p style="font-size: 14px; color: rgba(0,0,0,0.5); margin-bottom: 20px;">管理所有用户的账户和权限设置。管理员账号：admin / admin123</p>
+                
+                <div id="adminUserList" style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px;">
+                        <thead>
+                            <tr style="background: #f8f8f9;">
+                                <th style="padding: 10px; text-align: left; font-weight: 600;">用户名</th>
+                                <th style="padding: 10px; text-align: left; font-weight: 600;">显示名称</th>
+                                <th style="padding: 10px; text-align: left; font-weight: 600;">角色</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">搜索结果上限</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">搜索</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">查看商品</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">编辑商品</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">管理记录</th>
+                                <th style="padding: 10px; text-align: left; font-weight: 600;">注册时间</th>
+                                <th style="padding: 10px; text-align: center; font-weight: 600;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadList = document.getElementById('uploadList');
+        const uploadListGrid = document.getElementById('uploadListGrid');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const resultsStats = document.getElementById('resultsStats');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        let uploadedFiles = [];
+        let currentProductName = null;
+        let allProducts = [];
+        let currentSearchId = null;
+        let currentPerPage = 10;
+        
+        // ============ 用户认证系统 ============
+        let currentUser = null;   // {username, role, display_name, max_results, ...}
+        let authToken = '';
+        let authMode = 'login';   // 'login' or 'register'
+        
+        function getAuthHeaders() {
+            return authToken ? { 'X-Auth-Token': authToken } : {};
+        }
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me', {
+                    headers: getAuthHeaders()
+                });
+                const data = await response.json();
+                if (data.logged_in) {
+                    currentUser = data.user;
+                    authToken = getCookie('auth_token') || authToken;
+                    updateAuthUI();
+                } else {
+                    currentUser = null;
+                    updateAuthUI();
+                }
+            } catch (e) {
+                console.log('认证检查失败:', e);
+            }
+        }
+        
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return v ? v.pop() : '';
+        }
+        
+        function updateAuthUI() {
+            const loginBtn = document.getElementById('navLoginBtn');
+            const logoutBtn = document.getElementById('navLogoutBtn');
+            const userDisplay = document.getElementById('navUserDisplay');
+            const adminNav = document.getElementById('navAdmin');
+            
+            if (currentUser) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                const roleBadge = currentUser.role === 'admin' ? ' [管理员]' : '';
+                // 优先显示 username；display_name 仅在明确设置且不同于 username 时才使用
+                let showName = currentUser.username;
+                if (currentUser.display_name && currentUser.display_name !== currentUser.username) {
+                    showName = currentUser.display_name;
+                }
+                userDisplay.textContent = showName + roleBadge;
+                
+                // 管理员才显示用户管理入口
+                adminNav.style.display = currentUser.role === 'admin' ? 'inline' : 'none';
+            } else {
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+                userDisplay.textContent = '';
+                adminNav.style.display = 'none';
+            }
+        }
+        
+        function showAuthModal(mode) {
+            authMode = mode || 'login';
+            document.getElementById('authModal').style.display = 'block';
+            document.getElementById('authError').style.display = 'none';
+            
+            // 先设 readonly 阻止浏览器自动填充，再清空值
+            const usernameEl = document.getElementById('authUsername');
+            const passwordEl = document.getElementById('authPassword');
+            const displayNameEl = document.getElementById('authDisplayName');
+            usernameEl.setAttribute('readonly', 'readonly');
+            passwordEl.setAttribute('readonly', 'readonly');
+            usernameEl.value = '';
+            passwordEl.value = '';
+            displayNameEl.value = '';
+            
+            // 延迟移除 readonly 并聚焦，确保浏览器自动填充窗口已过
+            setTimeout(() => {
+                usernameEl.removeAttribute('readonly');
+                passwordEl.removeAttribute('readonly');
+                // 再次确认清空（防止自动填充在 display 切换后触发）
+                if (usernameEl.value && !usernameEl.matches(':focus')) usernameEl.value = '';
+                if (passwordEl.value && !passwordEl.matches(':focus')) passwordEl.value = '';
+                usernameEl.focus();
+            }, 150);
+            
+            if (authMode === 'login') {
+                document.getElementById('authTitle').textContent = '登录';
+                document.getElementById('authSubmitBtn').textContent = '登录';
+                document.getElementById('authSwitchText').textContent = '还没有账号？';
+                document.getElementById('authSwitchLink').textContent = '去注册';
+                document.getElementById('authDisplayNameRow').style.display = 'none';
+            } else {
+                document.getElementById('authTitle').textContent = '注册';
+                document.getElementById('authSubmitBtn').textContent = '注册';
+                document.getElementById('authSwitchText').textContent = '已有账号？';
+                document.getElementById('authSwitchLink').textContent = '去登录';
+                document.getElementById('authDisplayNameRow').style.display = 'block';
+            }
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+        
+        function toggleAuthMode() {
+            showAuthModal(authMode === 'login' ? 'register' : 'login');
+        }
+        
+        async function submitAuth() {
+            const username = document.getElementById('authUsername').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+            const displayName = document.getElementById('authDisplayName').value.trim();
+            const errorEl = document.getElementById('authError');
+            
+            if (!username || !password) {
+                errorEl.textContent = '请填写用户名和密码';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            const url = authMode === 'login' ? '/auth/login' : '/auth/register';
+            const body = { username, password };
+            if (authMode === 'register' && displayName) {
+                body.display_name = displayName;
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    errorEl.textContent = data.error || '操作失败';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                authToken = data.token;
+                currentUser = data.user;
+                closeAuthModal();
+                updateAuthUI();
+            } catch (e) {
+                errorEl.textContent = '网络错误: ' + e.message;
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        async function doLogout() {
+            try {
+                await fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+            } catch (e) {}
+            authToken = '';
+            currentUser = null;
+            updateAuthUI();
+            showPage('search');
+        }
+        
+        // ============ 管理员面板 ============
+        async function loadAdminUsers() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: getAuthHeaders()
+                });
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    alert(data.error || '加载失败');
+                    return;
+                }
+                
+                const tbody = document.getElementById('adminUsersTbody');
+                tbody.innerHTML = '';
+                
+                (data.users || []).forEach(u => {
+                    const isAdmin = u.role === 'admin';
+                    const isSuperAdmin = u.username === 'admin';
+                    
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #f0f0f0';
+                    
+                    tr.innerHTML = `
+                        <td style="padding:10px; font-weight:500;">${u.username}</td>
+                        <td style="padding:10px;">${u.display_name || u.username}</td>
+                        <td style="padding:10px;">
+                            <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; 
+                                background:${isAdmin ? '#e3f2fd' : '#f5f5f5'}; color:${isAdmin ? '#0071e3' : '#666'};">
+                                ${isAdmin ? '管理员' : '普通用户'}
+                            </span>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            <input type="number" value="${u.max_results}" min="1" max="9999" 
+                                data-username="${u.username}" data-field="max_results"
+                                onchange="adminUpdateField(this)"
+                                style="width:70px; padding:4px 6px; border:1px solid #e0e0e0; border-radius:4px; font-size:13px; text-align:center;"
+                                ${isSuperAdmin ? 'disabled' : ''}>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            <input type="checkbox" ${u.can_search ? 'checked' : ''} 
+                                data-username="${u.username}" data-field="can_search"
+                                onchange="adminToggleField(this)" ${isSuperAdmin ? 'disabled' : ''}>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            <input type="checkbox" ${u.can_view_products ? 'checked' : ''} 
+                                data-username="${u.username}" data-field="can_view_products"
+                                onchange="adminToggleField(this)" ${isSuperAdmin ? 'disabled' : ''}>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            <input type="checkbox" ${u.can_edit_products ? 'checked' : ''} 
+                                data-username="${u.username}" data-field="can_edit_products"
+                                onchange="adminToggleField(this)" ${isSuperAdmin ? 'disabled' : ''}>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            <input type="checkbox" ${u.can_manage_records ? 'checked' : ''} 
+                                data-username="${u.username}" data-field="can_manage_records"
+                                onchange="adminToggleField(this)" ${isSuperAdmin ? 'disabled' : ''}>
+                        </td>
+                        <td style="padding:10px; font-size:12px; color:rgba(0,0,0,0.5);">${u.created_time || '-'}</td>
+                        <td style="padding:10px; text-align:center;">
+                            ${isSuperAdmin ? '<span style="font-size:12px; color:rgba(0,0,0,0.3);">超级管理员</span>' : `
+                                <button onclick="adminResetPassword('${u.username}')" style="padding:3px 8px; background:#0071e3; color:white; border:none; border-radius:3px; font-size:11px; cursor:pointer; margin-right:4px;">重置密码</button>
+                                <button onclick="adminDeleteUser('${u.username}')" style="padding:3px 8px; background:#ff4d4f; color:white; border:none; border-radius:3px; font-size:11px; cursor:pointer;">删除</button>
+                            `}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                alert('加载用户列表失败: ' + e.message);
+            }
+        }
+        
+        async function adminUpdateField(el) {
+            const username = el.dataset.username;
+            const field = el.dataset.field;
+            const value = parseInt(el.value);
+            
+            const body = { username };
+            body[field] = value;
+            
+            try {
+                const response = await fetch('/admin/user/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (!data.success) alert(data.error || '更新失败');
+            } catch (e) {
+                alert('更新失败: ' + e.message);
+            }
+        }
+        
+        async function adminToggleField(el) {
+            const username = el.dataset.username;
+            const field = el.dataset.field;
+            const value = el.checked;
+            
+            const body = { username };
+            body[field] = value;
+            
+            try {
+                const response = await fetch('/admin/user/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    alert(data.error || '更新失败');
+                    el.checked = !value; // revert
+                }
+            } catch (e) {
+                alert('更新失败: ' + e.message);
+                el.checked = !value;
+            }
+        }
+        
+        async function adminResetPassword(username) {
+            const newPwd = prompt(`请输入用户 ${username} 的新密码（至少4位）：`);
+            if (!newPwd) return;
+            if (newPwd.length < 4) { alert('密码长度不能少于4位'); return; }
+            
+            try {
+                const response = await fetch('/admin/user/reset_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({ username, new_password: newPwd })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(`用户 ${username} 的密码已重置`);
+                } else {
+                    alert(data.error || '操作失败');
+                }
+            } catch (e) {
+                alert('操作失败: ' + e.message);
+            }
+        }
+        
+        async function adminDeleteUser(username) {
+            if (!confirm(`确定要删除用户 ${username} 吗？此操作不可撤销。`)) return;
+            
+            try {
+                const response = await fetch('/admin/user/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({ username })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    loadAdminUsers();
+                } else {
+                    alert(data.error || '删除失败');
+                }
+            } catch (e) {
+                alert('删除失败: ' + e.message);
+            }
+        }
+        
+        // 权重滑块
+        const dinoWeight = document.getElementById('dinoWeight');
+        const colorWeight = document.getElementById('colorWeight');
+        const textureWeight = document.getElementById('textureWeight');
+        const dinoWeightValue = document.getElementById('dinoWeightValue');
+        const colorWeightValue = document.getElementById('colorWeightValue');
+        const textureWeightValue = document.getElementById('textureWeightValue');
+        
+        // 模态框
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalCaption = document.getElementById('modalCaption');
+        
+        // ============ 页面切换 ============
+        function showPage(page) {
+            // 需要登录的页面检查
+            if (page === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
+                alert('需要管理员权限');
+                return;
+            }
+            if (page === 'products' && !currentUser) {
+                showAuthModal('login');
+                return;
+            }
+            if (page === 'products' && currentUser && !currentUser.can_view_products && currentUser.role !== 'admin') {
+                alert('您没有查看商品信息的权限，请联系管理员');
+                return;
+            }
+            
+            document.getElementById('productsPage').style.display = page === 'products' ? 'block' : 'none';
+            document.getElementById('searchPage').style.display = page === 'search' ? 'block' : 'none';
+            document.getElementById('adminPage').style.display = page === 'admin' ? 'block' : 'none';
+            
+            // 更新导航栏样式
+            const navItems = ['navSearch', 'navProducts', 'navAdmin'];
+            const pageMap = { 'search': 'navSearch', 'products': 'navProducts', 'admin': 'navAdmin' };
+            
+            navItems.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === pageMap[page]) {
+                    el.style.color = 'white';
+                    el.style.borderBottom = '2px solid white';
+                } else {
+                    el.style.color = 'rgba(255,255,255,0.7)';
+                    el.style.borderBottom = '2px solid transparent';
+                }
+            });
+            
+            if (page === 'products') loadProducts();
+            if (page === 'admin') loadAdminUsers();
+        }
+        
+        // ============ 商品信息管理 ============
+        async function loadProducts() {
+            if (!currentUser) {
+                showAuthModal('login');
+                return;
+            }
+            
+            const grid = document.getElementById('productGrid');
+            const loadingEl = document.getElementById('productLoading');
+            loadingEl.style.display = 'block';
+            grid.innerHTML = '';
+            
+            try {
+                const response = await fetch('/products', {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.status === 401) {
+                    showAuthModal('login');
+                    return;
+                }
+                if (response.status === 403) {
+                    const errData = await response.json();
+                    loadingEl.style.display = 'none';
+                    grid.innerHTML = `<p style="color:red; grid-column:1/-1; text-align:center;">${errData.error || '权限不足'}</p>`;
+                    return;
+                }
+                
+                const contentType = response.headers.get('content-type') || '';
+                
+                if (!contentType.includes('application/json')) {
+                    throw new Error('服务器返回了非JSON响应（可能后端py文件未更新），请确认后端已重启');
+                }
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || '服务器返回错误 ' + response.status);
+                }
+                
+                allProducts = data.products || [];
+                
+                loadingEl.style.display = 'none';
+                renderProductGrid(allProducts);
+            } catch (error) {
+                loadingEl.style.display = 'none';
+                grid.innerHTML = `<p style="color:red; grid-column:1/-1; text-align:center;">加载商品信息失败: ${error.message}<br><span style="font-size:12px; color:#666;">请确认已启用后端服务</span></p>`;
+                console.error('loadProducts error:', error);
+            }
+        }
+        
+        function renderProductGrid(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:#f5f5f7; border-radius:8px; overflow:hidden; cursor:pointer; transition:transform 0.2s;';
+                card.onmouseenter = () => card.style.transform = 'translateY(-2px)';
+                card.onmouseleave = () => card.style.transform = '';
+                card.onclick = () => openProductDetail(p.name);
+                
+                const imgSrc = `/product_image/${encodeURIComponent(p.name)}`;
+                card.innerHTML = `
+                    <img src="${imgSrc}" style="width:100%; height:140px; object-fit:cover; background:#eee;" loading="lazy">
+                    <div style="padding:10px;">
+                        <div style="font-size:12px; font-weight:500; word-break:break-all; margin-bottom:4px;">${p.name}</div>
+                        <div style="font-size:11px; color:rgba(0,0,0,0.5);">${p.pattern ? '花纹: '+p.pattern : ''} ${p.material ? '材质: '+p.material : ''}</div>
+                        <div style="font-size:11px; color:rgba(0,0,0,0.4); margin-top:2px;">下单:${p.order_count} 推荐:${p.recommend_count}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; color:rgba(0,0,0,0.4); grid-column:1/-1;">暂无商品</p>';
+            }
+        }
+        
+        function filterProductGrid() {
+            const keyword = document.getElementById('productSearchInput').value.trim().toLowerCase();
+            if (!keyword) {
+                renderProductGrid(allProducts);
+                return;
+            }
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(keyword));
+            renderProductGrid(filtered);
+        }
+        
+        async function openProductDetail(filename) {
+            if (!currentUser) {
+                showAuthModal('login');
+                return;
+            }
+            currentProductName = filename;
+            try {
+                const response = await fetch(`/product/${encodeURIComponent(filename)}`, {
+                    headers: getAuthHeaders()
+                });
+                if (response.status === 401) {
+                    showAuthModal('login');
+                    return;
+                }
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error('服务器返回了非JSON响应');
+                }
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || '加载失败');
+                }
+                
+                document.getElementById('pdName').textContent = data.name;
+                document.getElementById('pdMaterial').value = data.material || '';
+                document.getElementById('pdCraft').value = data.craft || '';
+                document.getElementById('pdPattern').value = data.pattern || '';
+                document.getElementById('pdDescription').value = data.description || '';
+                document.getElementById('pdImage').src = `/product_image/${encodeURIComponent(data.name)}`;
+                document.getElementById('pdSaveMsg').style.display = 'none';
+                
+                renderRecords('order', data.order_records || []);
+                renderRecords('recommend', data.recommend_records || []);
+                
+                document.getElementById('orderError').style.display = 'none';
+                document.getElementById('recError').style.display = 'none';
+                document.getElementById('orderRegion').value = '';
+                document.getElementById('orderCustomer').value = '';
+                document.getElementById('orderPerson').value = '';
+                document.getElementById('recRegion').value = '';
+                document.getElementById('recCustomer').value = '';
+                document.getElementById('recPerson').value = '';
+                
+                // 权限控制：根据用户权限显示/隐藏编辑相关UI
+                const canEdit = currentUser && (currentUser.can_edit_products || currentUser.role === 'admin');
+                const canManageRecords = currentUser && (currentUser.can_manage_records || currentUser.role === 'admin');
+                
+                // 商品信息编辑字段
+                document.getElementById('pdMaterial').readOnly = !canEdit;
+                document.getElementById('pdCraft').readOnly = !canEdit;
+                document.getElementById('pdPattern').readOnly = !canEdit;
+                document.getElementById('pdDescription').readOnly = !canEdit;
+                document.getElementById('pdSaveBtn').style.display = canEdit ? 'inline-block' : 'none';
+                
+                // 下单/推荐表单
+                document.getElementById('orderFormSection').style.display = canManageRecords ? 'grid' : 'none';
+                document.getElementById('recFormSection').style.display = canManageRecords ? 'grid' : 'none';
+                
+                document.getElementById('productDetailModal').style.display = 'block';
+            } catch (error) {
+                alert('加载商品详情失败: ' + error.message);
+            }
+        }
+        
+        function closeProductDetail() {
+            document.getElementById('productDetailModal').style.display = 'none';
+            currentProductName = null;
+        }
+        
+        async function saveProductInfo() {
+            if (!currentProductName) return;
+            if (!currentUser) { showAuthModal('login'); return; }
+            
+            try {
+                const response = await fetch('/product/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({
+                        name: currentProductName,
+                        material: document.getElementById('pdMaterial').value,
+                        craft: document.getElementById('pdCraft').value,
+                        pattern: document.getElementById('pdPattern').value,
+                        description: document.getElementById('pdDescription').value
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    const msg = document.getElementById('pdSaveMsg');
+                    msg.style.display = 'inline';
+                    setTimeout(() => msg.style.display = 'none', 2000);
+                } else {
+                    alert(data.error || '保存失败');
+                }
+            } catch (error) {
+                alert('保存失败: ' + error.message);
+            }
+        }
+        
+        function renderRecords(type, records) {
+            const tbody = document.getElementById(type === 'order' ? 'orderRecordsList' : 'recRecordsList');
+            const badge = document.getElementById(type === 'order' ? 'orderCountBadge' : 'recCountBadge');
+            
+            // 更新数量徽章
+            badge.textContent = `${records.length} 条`;
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:rgba(0,0,0,0.4); padding:12px;">暂无记录</td></tr>';
+                return;
+            }
+            
+            const statusColors = { '待处理': '#0071e3', '已下单': '#34c759', '已推荐': '#34c759', '已取消': '#ff4d4f' };
+            const statusLabel = type === 'order' ? '已下单' : '已推荐';
+            const canManage = currentUser && (currentUser.can_manage_records || currentUser.role === 'admin');
+            
+            tbody.innerHTML = records.map(r => `
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                    <td style="padding:8px;">${r.region}</td>
+                    <td style="padding:8px;">${r.customer}</td>
+                    <td style="padding:8px;">${r.person}</td>
+                    <td style="padding:8px;">${r.time}</td>
+                    <td style="padding:8px; color:${statusColors[r.status] || '#333'}; font-weight:500;">${r.status}</td>
+                    <td style="padding:8px;">
+                        ${r.status === '待处理' && canManage ? `
+                            <button onclick="updateRecordStatus('${type}','${r.id}','${statusLabel}')" style="padding:3px 8px; background:#34c759; color:white; border:none; border-radius:3px; font-size:12px; cursor:pointer; margin-right:4px;">${type === 'order' ? '下单' : '推荐'}</button>
+                            <button onclick="updateRecordStatus('${type}','${r.id}','已取消')" style="padding:3px 8px; background:#ff4d4f; color:white; border:none; border-radius:3px; font-size:12px; cursor:pointer;">取消</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function addRecord(type) {
+            if (!currentProductName) return;
+            if (!currentUser) { showAuthModal('login'); return; }
+            
+            const prefix = type === 'order' ? 'order' : 'rec';
+            const region = document.getElementById(`${prefix}Region`).value.trim();
+            const customer = document.getElementById(`${prefix}Customer`).value.trim();
+            const person = document.getElementById(`${prefix}Person`).value.trim();
+            const errorEl = document.getElementById(`${prefix}Error`);
+            
+            if (!region || !customer || !person) {
+                errorEl.textContent = '请填写完整信息';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/product/record/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({
+                        product_name: currentProductName,
+                        record_type: type,
+                        region: region,
+                        customer: customer,
+                        person: person
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    errorEl.style.display = 'none';
+                    document.getElementById(`${prefix}Region`).value = '';
+                    document.getElementById(`${prefix}Customer`).value = '';
+                    document.getElementById(`${prefix}Person`).value = '';
+                    // 重新加载商品详情
+                    openProductDetail(currentProductName);
+                } else {
+                    errorEl.textContent = data.error;
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = '操作失败: ' + error.message;
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        async function updateRecordStatus(type, recordId, newStatus) {
+            if (!currentProductName) return;
+            
+            try {
+                const response = await fetch('/product/record/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({
+                        product_name: currentProductName,
+                        record_id: recordId,
+                        record_type: type,
+                        new_status: newStatus
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    openProductDetail(currentProductName);
+                } else {
+                    alert(data.error || '操作失败');
+                }
+            } catch (error) {
+                alert('操作失败: ' + error.message);
+            }
+        }
+        
+        // ============ 权重滑块 ============
+        function updateWeightDisplay() {
+            dinoWeightValue.textContent = dinoWeight.value + '%';
+            colorWeightValue.textContent = colorWeight.value + '%';
+            textureWeightValue.textContent = textureWeight.value + '%';
+        }
+        
+        dinoWeight.addEventListener('input', updateWeightDisplay);
+        colorWeight.addEventListener('input', updateWeightDisplay);
+        textureWeight.addEventListener('input', updateWeightDisplay);
+        
+        // ============ 文件上传 ============
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedFiles.push({
+                        file: file,
+                        preview: e.target.result,
+                        weight: 100
+                    });
+                    updateUploadList();
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            searchBtn.disabled = true;
+            hideError();
+        }
+        
+        function updateSearchButtonState() {
+            const hasImages = uploadedFiles.length > 0;
+            const hasTextQuery = document.getElementById('textQuery').value.trim() !== '';
+            const hasMaterial = document.getElementById('materialFilter').value.trim() !== '';
+            const hasCraft = document.getElementById('craftFilter').value.trim() !== '';
+            const hasPattern = document.getElementById('patternFilter').value.trim() !== '';
+            const hasPriceRange = document.getElementById('priceRange').value.trim() !== '';
+            
+            searchBtn.disabled = !(hasImages || hasTextQuery || hasMaterial || hasCraft || hasPattern || hasPriceRange);
+        }
+        
+        document.getElementById('textQuery').addEventListener('input', updateSearchButtonState);
+        document.getElementById('materialFilter').addEventListener('input', updateSearchButtonState);
+        document.getElementById('craftFilter').addEventListener('input', updateSearchButtonState);
+        document.getElementById('patternFilter').addEventListener('input', updateSearchButtonState);
+        document.getElementById('priceRange').addEventListener('input', updateSearchButtonState);
+        
+        function updateUploadList() {
+            if (uploadedFiles.length === 0) {
+                uploadList.style.display = 'none';
+                return;
+            }
+            
+            uploadList.style.display = 'block';
+            uploadListGrid.innerHTML = '';
+            
+            uploadedFiles.forEach((item, index) => {
+                const uploadItem = document.createElement('div');
+                uploadItem.style.cssText = `
+                    position: relative;
+                    width: 100px;
+                    height: 100px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    background: #f5f5f7;
+                `;
+                
+                uploadItem.innerHTML = `
+                    <img src="${item.preview}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button onclick="removeUpload(${index})" style="
+                        position: absolute; top: 5px; right: 5px; width: 20px; height: 20px;
+                        border: none; border-radius: 50%; background: rgba(255, 0, 0, 0.7);
+                        color: white; font-size: 12px; cursor: pointer; display: flex;
+                        align-items: center; justify-content: center;
+                    ">×</button>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 5px;">
+                        <input type="range" min="0" max="100" value="${item.weight}" onchange="updateImageWeight(${index}, this.value)" style="width: 100%; height: 20px; cursor: pointer;">
+                        <div style="color: white; font-size: 10px; text-align: center;">权重: ${item.weight}%</div>
+                    </div>
+                `;
+                
+                uploadListGrid.appendChild(uploadItem);
+            });
+        }
+        
+        function removeUpload(index) {
+            uploadedFiles.splice(index, 1);
+            updateUploadList();
+            updateSearchButtonState();
+        }
+        
+        function updateImageWeight(index, value) {
+            uploadedFiles[index].weight = parseInt(value);
+            updateUploadList();
+        }
+        
+        function clearUploads() {
+            uploadedFiles = [];
+            updateUploadList();
+            updateSearchButtonState();
+        }
+        
+        function equalizeWeights() {
+            if (uploadedFiles.length === 0) return;
+            uploadedFiles.forEach(item => { item.weight = 100; });
+            updateUploadList();
+            hideError();
+        }
+        
+        function addResultToUploads(imageSrc, filename) {
+            try {
+                const base64Data = imageSrc.split(',')[1];
+                if (!base64Data) throw new Error('无效的base64数据');
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'image/jpeg' });
+                const file = new File([blob], filename, { type: 'image/jpeg' });
+                
+                uploadedFiles.push({ file: file, preview: imageSrc, weight: 100 });
+                updateUploadList();
+                updateSearchButtonState();
+                showError('已添加结果图片到上传列表');
+            } catch (error) {
+                showError('添加结果图片失败: ' + error.message);
+            }
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+        
+        // ============ 搜索 ============
+        async function searchImages() {
+            // 登录检查
+            if (!currentUser) {
+                showAuthModal('login');
+                return;
+            }
+            if (!currentUser.can_search) {
+                showError('您没有搜索权限，请联系管理员');
+                return;
+            }
+            
+            const textQuery = document.getElementById('textQuery').value;
+            const materialFilter = document.getElementById('materialFilter').value.trim();
+            const craftFilter = document.getElementById('craftFilter').value.trim();
+            const patternFilter = document.getElementById('patternFilter').value.trim();
+            const priceRange = document.getElementById('priceRange').value.trim();
+            
+            if (uploadedFiles.length === 0 && !textQuery && !materialFilter && !craftFilter && !patternFilter && !priceRange) {
+                showError('请先选择至少一张图片、输入文字查询或填写筛选条件');
+                return;
+            }
+            
+            const perPage = document.getElementById('perPage').value;
+            currentPerPage = parseInt(perPage);
+            const searchMode = document.getElementById('searchMode').value;
+            
+            const formData = new FormData();
+            
+            uploadedFiles.forEach((item, index) => {
+                formData.append(`file${index}`, item.file);
+                formData.append(`weight${index}`, item.weight);
+            });
+            
+            formData.append('per_page', perPage);
+            formData.append('page', 1);
+            formData.append('mode', searchMode);
+            formData.append('file_count', uploadedFiles.length);
+            formData.append('text_query', textQuery);
+            formData.append('material_filter', materialFilter);
+            formData.append('craft_filter', craftFilter);
+            formData.append('pattern_filter', patternFilter);
+            formData.append('price_range', priceRange);
+            formData.append('top_k', currentUser.max_results || 50);
+            
+            if (searchMode === 'fusion') {
+                formData.append('dino_weight', dinoWeight.value);
+                formData.append('color_weight', colorWeight.value);
+                formData.append('texture_weight', textureWeight.value);
+            }
+            
+            loading.style.display = 'block';
+            resultsSection.style.display = 'none';
+            searchBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    showAuthModal('login');
+                    return;
+                }
+                if (response.status === 403) {
+                    showError(data.error || '权限不足');
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error(data.error || '搜索失败');
+                }
+                
+                currentSearchId = data.search_id;
+                displayResults(data);
+            } catch (error) {
+                showError('搜索出错: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                searchBtn.disabled = false;
+            }
+        }
+        
+        function displayResults(data) {
+            resultsGrid.innerHTML = '';
+            
+            if (data.results && data.results.length > 0) {
+                const pg = data.pagination || {};
+                let statsText = `模式: ${data.mode === 'fusion' ? '综合' : '整体'} | 子图库: ${data.total_subimages} | 共 ${pg.total_results || data.results.length} 个结果（搜索耗时: ${data.search_time.toFixed(2)}秒）`;
+                if (data.user_max_results && currentUser && currentUser.role !== 'admin') {
+                    statsText += ` | 您可查看上限: ${data.user_max_results} 张`;
+                }
+                if (data.text_query) {
+                    statsText += ` | 文字查询: ${data.text_query}`;
+                }
+                if (pg.total_pages > 1) {
+                    statsText += ` | 第 ${pg.page}/${pg.total_pages} 页`;
+                }
+                resultsStats.textContent = statsText;
+                
+                data.results.forEach(result => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    
+                    const imageSrc = result.image ? `data:image/jpeg;base64,${result.image}` : '';
+                    
+                    let attributesHtml = '';
+                    if (result.attributes) {
+                        attributesHtml = `
+                            <div class="result-info">材质: ${result.attributes.material || '-'}</div>
+                            <div class="result-info">工艺: ${result.attributes.craft || '-'}</div>
+                            <div class="result-info">花纹: ${result.attributes.pattern || '-'}</div>
+                            <div class="result-info">描述: ${result.attributes.description || '-'}</div>
+                        `;
+                    }
+                    
+                    card.innerHTML = `
+                        <img src="${imageSrc}" class="result-image" alt="结果图片" onclick="openModal('${imageSrc}', '${result.original_filename} (相似度: ${(result.score * 100).toFixed(2)}%)')">
+                        <div class="result-info">排名: ${result.rank} | 相似度: ${(result.score * 100).toFixed(2)}%</div>
+                        <div class="result-info">图片: ${result.original_filename}</div>
+                        ${attributesHtml}
+                        <div class="result-actions">
+                            <button onclick="addResultToUploads('${imageSrc}', '${result.original_filename}')" style="
+                                padding: 4px 8px; background: #0071e3; color: white; border: none;
+                                border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 5px;
+                            ">加入上传</button>
+                            <button onclick="openModal('${imageSrc}', '${result.original_filename}')" style="
+                                padding: 4px 8px; background: #f0f0f0; border: 1px solid #ddd;
+                                border-radius: 4px; font-size: 12px; cursor: pointer;
+                            ">查看大图</button>
+                        </div>
+                    `;
+                    
+                    resultsGrid.appendChild(card);
+                });
+                
+                // 渲染翻页控件
+                if (pg.total_pages > 1) {
+                    renderPagination(pg.page, pg.total_pages, pg.total_results);
+                } else {
+                    document.getElementById('paginationControls').style.display = 'none';
+                }
+                
+                resultsSection.style.display = 'block';
+                
+                // 滚动到结果区域顶部
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                showError('未找到相似图片');
+            }
+        }
+        
+        function renderPagination(currentPage, totalPages, totalResults) {
+            const container = document.getElementById('paginationControls');
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            
+            // 上一页按钮
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '‹ 上一页';
+            prevBtn.disabled = currentPage <= 1;
+            prevBtn.onclick = () => loadSearchPage(currentPage - 1);
+            container.appendChild(prevBtn);
+            
+            // 页码按钮 - 智能显示
+            const pages = generatePageNumbers(currentPage, totalPages);
+            pages.forEach(p => {
+                if (p === '...') {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'page-ellipsis';
+                    ellipsis.textContent = '...';
+                    container.appendChild(ellipsis);
+                } else {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = p;
+                    if (p === currentPage) {
+                        pageBtn.className = 'active';
+                    }
+                    pageBtn.onclick = () => loadSearchPage(p);
+                    container.appendChild(pageBtn);
+                }
+            });
+            
+            // 下一页按钮
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '下一页 ›';
+            nextBtn.disabled = currentPage >= totalPages;
+            nextBtn.onclick = () => loadSearchPage(currentPage + 1);
+            container.appendChild(nextBtn);
+            
+            // 页码信息
+            const info = document.createElement('span');
+            info.className = 'page-info';
+            info.textContent = `共 ${totalResults} 个结果`;
+            container.appendChild(info);
+        }
+        
+        function generatePageNumbers(current, total) {
+            if (total <= 7) {
+                return Array.from({length: total}, (_, i) => i + 1);
+            }
+            
+            const pages = [];
+            pages.push(1);
+            
+            if (current > 3) {
+                pages.push('...');
+            }
+            
+            const start = Math.max(2, current - 1);
+            const end = Math.min(total - 1, current + 1);
+            
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+            
+            if (current < total - 2) {
+                pages.push('...');
+            }
+            
+            if (total > 1) {
+                pages.push(total);
+            }
+            
+            return pages;
+        }
+        
+        async function loadSearchPage(page) {
+            if (!currentSearchId) {
+                showError('搜索结果已过期，请重新搜索');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/search/page', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({
+                        search_id: currentSearchId,
+                        page: page,
+                        per_page: currentPerPage
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || '加载失败');
+                }
+                
+                displayResults(data);
+            } catch (error) {
+                showError('翻页失败: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // ============ 模态框 ============
+        function openModal(src, caption) {
+            modal.style.display = 'block';
+            modalImage.src = src;
+            modalCaption.textContent = caption;
+        }
+        
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == modal) closeModal();
+            if (event.target == document.getElementById('productDetailModal')) closeProductDetail();
+            if (event.target == document.getElementById('authModal')) closeAuthModal();
+        }
+        
+        // Auth modal Enter key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.getElementById('authModal').style.display === 'block') {
+                submitAuth();
+            }
+        });
+        
+        // ============ 系统状态 ============
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                if (data.status === 'ready') {
+                    searchBtn.disabled = false;
+                    updateSearchButtonState();
+                }
+            } catch (error) {
+                console.log('检查系统状态失败:', error);
+            }
+        }
+        
+        setInterval(checkSystemStatus, 3000);
+        checkSystemStatus();
+        
+        // 页面加载时检查登录状态
+        checkAuth();
+    </script>
+</body>
+</html>
